@@ -75,7 +75,7 @@ func (s *server) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.T
 	return response, nil
 }
 
-func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api.TokenResponse, error) {
+func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api.RefreshResponse, error) {
 
 	refresh := request.RefreshToken
 
@@ -94,7 +94,7 @@ func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api
 		return nil, err
 	}
 
-	return refresh, nil
+	return &api.RefreshResponse{RefreshToken: refresh}, nil
 }
 
 func (s *server) Logout(ctx context.Context, request *api.LogoutRequest) (*api.Empty, error) {
