@@ -7,6 +7,7 @@ type AppConfig struct {
 	Env   string      `yaml:"env"`
 	Redis RedisConfig `yaml:"redis"`
 	Pg    SqlConfig   `yaml:"pg"`
+	Jwt   JwtConfig   `yaml:"jwt"`
 }
 
 type RedisConfig struct {
@@ -20,6 +21,11 @@ type SqlConfig struct {
 	Port string `yaml:"port"`
 	Db   string `yaml:"db"`
 	TLS  string `yaml:"tls" env-default:"disabled"`
+}
+
+type JwtConfig struct {
+	AccessTTL  float32 `yaml:"accessTTL"`
+	RefreshTTL float32 `yaml:"refreshTTL"`
 }
 
 func SetupConfig(path string) *AppConfig {

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/joho/godotenv"
 	"github.com/sladkoezhkovo/auth-service/internal/configs"
 )
 
@@ -13,6 +14,10 @@ func init() {
 }
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		panic("Error loading environment")
+	}
+
 	flag.Parse()
 
 	config := configs.SetupConfig(configPath)
