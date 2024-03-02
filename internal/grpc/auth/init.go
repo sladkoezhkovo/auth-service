@@ -16,6 +16,8 @@ type JwtService interface {
 	GenerateAccess(payload interface{}) (string, error)
 	GenerateRefresh(payload interface{}) (string, error)
 	Validate(token string) (string, error)
+	Save(refresh string) error
+	Clear(email string) error
 }
 
 type RoleService interface {
@@ -67,6 +69,10 @@ func (s *server) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.T
 		return nil, err
 	}
 
+	if err := s.jwtService.Save(refresh); err != nil {
+		return nil, err
+	}
+
 	response := &api.TokenResponse{
 		RefreshToken: refresh,
 		AccessToken:  access,
@@ -75,11 +81,9 @@ func (s *server) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.T
 	return response, nil
 }
 
-func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api.RefreshResponse, error) {
+func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api.TokenResponse, error) {
 
-	refresh := request.RefreshToken
-
-	email, err := s.jwtService.Validate(refresh)
+	email, err := s.jwtService.Validate(request.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
@@ -89,15 +93,26 @@ func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api
 		return nil, err
 	}
 
-	refresh, err = s.jwtService.GenerateRefresh(u)
+	refresh, err := s.jwtService.GenerateRefresh(u)
 	if err != nil {
 		return nil, err
 	}
 
-	return &api.RefreshResponse{RefreshToken: refresh}, nil
+	access, err := s.jwtService.GenerateAccess(u)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := s.jwtService.Save(refresh); err != nil {
+		return nil, err
+	}
+
+	return &api.TokenResponse{
+		AccessToken:  access,
+		RefreshToken: refresh,
+	}, nil
 }
 
 func (s *server) Logout(ctx context.Context, request *api.LogoutRequest) (*api.Empty, error) {
-	//TODO implement me
-	panic("implement me")
+	return &api.Empty{}, s.jwtService.Clear(request.Email)
 }
