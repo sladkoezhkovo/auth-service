@@ -17,7 +17,7 @@ func (r *roleRepository) Find(name string) (*entity.Role, error) {
 
 	var role []entity.Role
 
-	if err := r.db.Select(&role, "SELECT * FROM role"); err != nil {
+	if err := r.db.Select(&role, "SELECT * FROM role WHERE name=$1", name); err != nil {
 		return nil, err
 	}
 
