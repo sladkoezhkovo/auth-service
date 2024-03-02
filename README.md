@@ -5,15 +5,14 @@
 - **User store** - PostgreSQL
 - **Refresh JWT store** - Redis
 
-## Enviroment variables
+## Environment variables
 
 ```yaml
 # jwt.env
-JWT_REFRESH_SECRET  - secret phrase for refresh tokens
-JWT_ACCESS_SECRET   - secret phrase for access tokens
+JWT_REFRESH_SECRET
+JWT_ACCESS_SECRET
 
 # pg.env 
-# postgresql credentials
 POSTGRES_USER       
 POSTGRES_PASSWORD   
 
