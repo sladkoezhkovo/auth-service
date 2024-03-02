@@ -1,6 +1,3 @@
-[submodule "api"]
-	path = api
-	url = https://github.com/sladkoezhkovo/protobuf.git
 [submodule "proto"]
 	path = proto
 	url = https://github.com/sladkoezhkovo/proto.git
