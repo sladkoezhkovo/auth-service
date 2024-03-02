@@ -19,7 +19,7 @@ func New(storage roleStorage) *roleService {
 	}
 }
 
-func (r *roleService) Get(name string) (*entity.Role, error) {
+func (r *roleService) Find(name string) (*entity.Role, error) {
 	role, err := r.storage.Find(name)
 	if err != nil {
 		return nil, err

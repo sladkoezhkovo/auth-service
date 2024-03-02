@@ -1,6 +1,7 @@
 package userservice
 
 import (
+	"errors"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
 	"golang.org/x/crypto/bcrypt"
 	"time"
@@ -14,12 +15,21 @@ type UserRepository interface {
 	Delete(id int) error
 }
 
-type RoleFinder interface {
-	FindId(role string) (int, error)
-}
-
 type userService struct {
 	repository UserRepository
+}
+
+func (s *userService) Find(email string) (*entity.User, error) {
+
+	u, err := s.repository.Find(email)
+	if err != nil {
+		return nil, err
+	}
+	if u == nil {
+		return nil, errors.New("user not found")
+	}
+
+	return u, nil
 }
 
 func New(repo UserRepository) *userService {

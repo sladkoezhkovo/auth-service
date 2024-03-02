@@ -1,5 +1,7 @@
-name: 'auth-service'
-env: 'local'
+app:
+  name: 'auth-service'
+  env: 'local'
+  port: 5081
 
 redis:
   host: 'redis'

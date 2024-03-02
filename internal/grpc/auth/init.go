@@ -13,21 +13,22 @@ type UserService interface {
 }
 
 type JwtService interface {
-	Generate(payload interface{}) (*entity.Tokens, error)
+	Generate(u *entity.User) (*entity.Tokens, error)
 	ValidateRefresh(token string) (*entity.UserClaims, error)
 	ValidateAccess(token string) (*entity.UserClaims, error)
-	Save(refresh string) error
+	Save(email, refresh string) error
 	Clear(email string) error
 }
 
 type RoleService interface {
-	GetId(role string) (int, error)
+	Find(role string) (*entity.Role, error)
 }
 
 type server struct {
 	userService UserService
 	jwtService  JwtService
 	roleService RoleService
+	api.UnimplementedAuthServiceServer
 }
 
 func NewServer(user UserService, jwt JwtService, role RoleService) *server {
@@ -50,7 +51,9 @@ func (s *server) SignIn(ctx context.Context, request *api.SignInRequest) (*api.T
 		return nil, err
 	}
 
-	s.jwtService.Save(tokens.Refresh)
+	if err := s.jwtService.Save(u.Email, tokens.Refresh); err != nil {
+		return nil, err
+	}
 
 	return &api.TokenResponse{
 		RefreshToken: tokens.Refresh,
@@ -62,12 +65,12 @@ func (s *server) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.T
 
 	// TODO VALIDATE REQUEST
 
-	roleId, err := s.roleService.GetId(request.Role)
+	role, err := s.roleService.Find(request.Role)
 	if err != nil {
 		return nil, err
 	}
 
-	u, err := s.userService.SignUp(request.Email, request.Password, roleId)
+	u, err := s.userService.SignUp(request.Email, request.Password, role.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +80,7 @@ func (s *server) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.T
 		return nil, err
 	}
 
-	if err := s.jwtService.Save(tokens.Refresh); err != nil {
+	if err := s.jwtService.Save(u.Email, tokens.Refresh); err != nil {
 		return nil, err
 	}
 
@@ -104,7 +107,7 @@ func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api
 		return nil, err
 	}
 
-	if err := s.jwtService.Save(tokens.Refresh); err != nil {
+	if err := s.jwtService.Save(u.Email, tokens.Refresh); err != nil {
 		return nil, err
 	}
 
@@ -120,7 +123,7 @@ func (s *server) Logout(ctx context.Context, request *api.LogoutRequest) (*api.E
 
 func (s *server) Auth(ctx context.Context, request *api.AuthRequest) (*api.AuthResponse, error) {
 
-	role, err := s.roleService.GetId(request.Role)
+	role, err := s.roleService.Find(request.Role)
 	if err != nil {
 		return nil, err
 	}
@@ -132,6 +135,6 @@ func (s *server) Auth(ctx context.Context, request *api.AuthRequest) (*api.AuthR
 	}
 
 	return &api.AuthResponse{
-		Approved: role == info.Role,
+		Approved: role.Id == info.Role,
 	}, nil
 }

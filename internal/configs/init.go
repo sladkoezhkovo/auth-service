@@ -2,12 +2,17 @@ package configs
 
 import "github.com/ilyakaznacheev/cleanenv"
 
-type AppConfig struct {
-	Name  string      `yaml:"name"`
-	Env   string      `yaml:"env"`
+type Config struct {
+	App   AppConfig   `yaml:"app"`
 	Redis RedisConfig `yaml:"redis"`
 	Pg    SqlConfig   `yaml:"pg"`
 	Jwt   JwtConfig   `yaml:"jwt"`
+}
+
+type AppConfig struct {
+	Name string `yaml:"name"`
+	Env  string `yaml:"env"`
+	Port int    `yaml:"port"`
 }
 
 type RedisConfig struct {
@@ -18,7 +23,7 @@ type RedisConfig struct {
 
 type SqlConfig struct {
 	Host string `yaml:"host"`
-	Port string `yaml:"port"`
+	Port int    `yaml:"port"`
 	Db   string `yaml:"db"`
 	TLS  string `yaml:"tls" env-default:"disabled"`
 }
@@ -28,8 +33,8 @@ type JwtConfig struct {
 	RefreshTTL int `yaml:"refreshTTL"`
 }
 
-func SetupConfig(path string) *AppConfig {
-	var config AppConfig
+func SetupConfig(path string) *Config {
+	var config Config
 
 	if err := cleanenv.ReadConfig(path, &config); err != nil {
 		panic("cannot read config")
