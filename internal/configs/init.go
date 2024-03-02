@@ -24,8 +24,8 @@ type SqlConfig struct {
 }
 
 type JwtConfig struct {
-	AccessTTL  float32 `yaml:"accessTTL"`
-	RefreshTTL float32 `yaml:"refreshTTL"`
+	AccessTTL  int `yaml:"accessTTL"`
+	RefreshTTL int `yaml:"refreshTTL"`
 }
 
 func SetupConfig(path string) *AppConfig {

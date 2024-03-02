@@ -12,5 +12,5 @@ pg:
   tls: 'disabled'
 
 jwt:
-  accessTTL: 0.5
-  refreshTTL: 7
+  accessTTL: 1
+  refreshTTL: 24

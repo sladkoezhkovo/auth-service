@@ -14,7 +14,8 @@ type UserService interface {
 
 type JwtService interface {
 	Generate(payload interface{}) (*entity.Tokens, error)
-	Validate(token string) (string, error)
+	ValidateRefresh(token string) (*entity.UserClaims, error)
+	ValidateAccess(token string) (*entity.UserClaims, error)
 	Save(refresh string) error
 	Clear(email string) error
 }
@@ -88,12 +89,12 @@ func (s *server) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.T
 
 func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api.TokenResponse, error) {
 
-	email, err := s.jwtService.Validate(request.RefreshToken)
+	info, err := s.jwtService.ValidateRefresh(request.RefreshToken)
 	if err != nil {
 		return nil, err
 	}
 
-	u, err := s.userService.Find(email)
+	u, err := s.userService.Find(info.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -115,4 +116,22 @@ func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api
 
 func (s *server) Logout(ctx context.Context, request *api.LogoutRequest) (*api.Empty, error) {
 	return &api.Empty{}, s.jwtService.Clear(request.Email)
+}
+
+func (s *server) Auth(ctx context.Context, request *api.AuthRequest) (*api.AuthResponse, error) {
+
+	role, err := s.roleService.GetId(request.Role)
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := s.jwtService.ValidateAccess(request.AccessToken)
+	if err != nil {
+		// TODO add errors.Is() for expired token
+		return nil, err
+	}
+
+	return &api.AuthResponse{
+		Approved: role == info.Role,
+	}, nil
 }
