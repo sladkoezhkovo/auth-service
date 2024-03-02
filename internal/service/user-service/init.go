@@ -28,7 +28,7 @@ func New(repo UserRepository) *userService {
 	}
 }
 
-func (u *userService) SignUp(email, password, role string) (*entity.User, error) {
+func (s *userService) SignUp(email, password string, role int) (*entity.User, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
@@ -40,4 +40,29 @@ func (u *userService) SignUp(email, password, role string) (*entity.User, error)
 		Role:      role,
 		CreatedAt: time.Now(),
 	}
+
+	if err := s.repository.Create(user); err != nil {
+		return nil, err
+	}
+
+	return user, err
+}
+
+func (s *userService) SignIn(email, password string) (*entity.User, error) {
+
+	user, err := s.repository.Find(email)
+	if err != nil {
+		return nil, err
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := bcrypt.CompareHashAndPassword(hash, []byte(password)); err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }
