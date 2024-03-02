@@ -1,0 +1,18 @@
+app:
+  name: 'auth-service'
+  env: 'local'
+  port: 5081
+
+redis:
+  host: 'redis'
+  port: 6379
+
+pg:
+  host: 'pg'
+  port: 5432
+  db: 'auth'
+  tls: 'disabled'
+
+jwt:
+  accessTTL: 1
+  refreshTTL: 24
