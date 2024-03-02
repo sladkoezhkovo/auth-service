@@ -6,7 +6,7 @@ import (
 
 type TokenStorage interface {
 	Get(key string) (string, error)
-	Set(key, value string) error
+	Set(key string, value interface{}, ttl int) error
 	Clear(key string) error
 }
 
@@ -23,7 +23,7 @@ func New(config *configs.JwtConfig, storage TokenStorage) *jwtService {
 }
 
 func (s *jwtService) Save(email, token string) error {
-	return s.storage.Set(email, token)
+	return s.storage.Set(email, token, 0)
 }
 
 func (s *jwtService) Clear(email string) error {

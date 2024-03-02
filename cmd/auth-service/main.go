@@ -2,9 +2,10 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/sladkoezhkovo/auth-service/internal/configs"
+	jwtservice "github.com/sladkoezhkovo/auth-service/internal/service/jwt-service"
+	"github.com/sladkoezhkovo/auth-service/internal/storage/redis"
 )
 
 var configPath string
@@ -22,5 +23,6 @@ func main() {
 
 	config := configs.SetupConfig(configPath)
 
-	fmt.Println(config)
+	redisStorage := redis.New(&config.Redis)
+	_ = jwtservice.New(&config.Jwt, redisStorage)
 }
