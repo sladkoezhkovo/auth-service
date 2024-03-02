@@ -26,7 +26,7 @@ func init() {
 }
 
 func main() {
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load("jwt", "pg", "redis"); err != nil {
 		panic("Error loading environment")
 	}
 
