@@ -6,16 +6,31 @@ import (
 )
 
 type roleRepository struct {
-	connection *sqlx.DB
+	db *sqlx.DB
 }
 
-func (r roleRepository) Find(name string) (*entity.Role, error) {
-	//TODO implement me
-	panic("implement me")
+func (r *roleRepository) Create(role *entity.Role) error {
+	return r.db.Get(&role.Id, "INSERT INTO role(name) VALUES ($1)", role.Name)
+}
+
+func (r *roleRepository) Find(name string) (*entity.Role, error) {
+
+	var role []entity.Role
+
+	if err := r.db.Select(&role, "SELECT * FROM role"); err != nil {
+		return nil, err
+	}
+
+	if len(role) < 1 {
+		//return nil, errors.New("role not found")
+		return nil, nil
+	}
+
+	return &role[0], nil
 }
 
 func NewRoleRepository(conn *sqlx.DB) *roleRepository {
 	return &roleRepository{
-		connection: conn,
+		db: conn,
 	}
 }

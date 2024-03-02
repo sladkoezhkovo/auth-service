@@ -3,6 +3,7 @@ package pg
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"github.com/sladkoezhkovo/auth-service/internal/configs"
 	"os"
 )
