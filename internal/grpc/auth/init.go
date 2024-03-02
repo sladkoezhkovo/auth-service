@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	api "github.com/sladkoezhkovo/auth-service/api/authservice"
+	api "github.com/sladkoezhkovo/auth-service/api"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
 )
 

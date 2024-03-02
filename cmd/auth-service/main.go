@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/joho/godotenv"
-	api "github.com/sladkoezhkovo/auth-service/api/authservice"
+	api "github.com/sladkoezhkovo/auth-service/api"
 	"github.com/sladkoezhkovo/auth-service/internal/configs"
 	"github.com/sladkoezhkovo/auth-service/internal/grpc/auth"
 	jwtservice "github.com/sladkoezhkovo/auth-service/internal/service/jwt-service"
