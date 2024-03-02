@@ -7,14 +7,13 @@ import (
 )
 
 type UserService interface {
-	SignIn(email, password string) error
+	SignIn(email, password string) (*entity.User, error)
 	SignUp(email, password string, role int) (*entity.User, error)
 	Find(email string) (*entity.User, error)
 }
 
 type JwtService interface {
-	GenerateAccess(payload interface{}) (string, error)
-	GenerateRefresh(payload interface{}) (string, error)
+	Generate(payload interface{}) (*entity.Tokens, error)
 	Validate(token string) (string, error)
 	Save(refresh string) error
 	Clear(email string) error
@@ -40,9 +39,22 @@ func NewServer(user UserService, jwt JwtService, role RoleService) *server {
 
 func (s *server) SignIn(ctx context.Context, request *api.SignInRequest) (*api.TokenResponse, error) {
 
-	// TODO VALIDATE REQUEST
+	u, err := s.userService.SignIn(request.Email, request.Password)
+	if err != nil {
+		return nil, err
+	}
 
-	//return response, nil
+	tokens, err := s.jwtService.Generate(u)
+	if err != nil {
+		return nil, err
+	}
+
+	s.jwtService.Save(tokens.Refresh)
+
+	return &api.TokenResponse{
+		RefreshToken: tokens.Refresh,
+		AccessToken:  tokens.Access,
+	}, nil
 }
 
 func (s *server) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.TokenResponse, error) {
@@ -59,26 +71,19 @@ func (s *server) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.T
 		return nil, err
 	}
 
-	access, err := s.jwtService.GenerateAccess(u)
+	tokens, err := s.jwtService.Generate(u)
 	if err != nil {
 		return nil, err
 	}
 
-	refresh, err := s.jwtService.GenerateRefresh(u)
-	if err != nil {
+	if err := s.jwtService.Save(tokens.Refresh); err != nil {
 		return nil, err
 	}
 
-	if err := s.jwtService.Save(refresh); err != nil {
-		return nil, err
-	}
-
-	response := &api.TokenResponse{
-		RefreshToken: refresh,
-		AccessToken:  access,
-	}
-
-	return response, nil
+	return &api.TokenResponse{
+		RefreshToken: tokens.Refresh,
+		AccessToken:  tokens.Access,
+	}, nil
 }
 
 func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api.TokenResponse, error) {
@@ -93,23 +98,18 @@ func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api
 		return nil, err
 	}
 
-	refresh, err := s.jwtService.GenerateRefresh(u)
+	tokens, err := s.jwtService.Generate(u)
 	if err != nil {
 		return nil, err
 	}
 
-	access, err := s.jwtService.GenerateAccess(u)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.jwtService.Save(refresh); err != nil {
+	if err := s.jwtService.Save(tokens.Refresh); err != nil {
 		return nil, err
 	}
 
 	return &api.TokenResponse{
-		AccessToken:  access,
-		RefreshToken: refresh,
+		RefreshToken: tokens.Refresh,
+		AccessToken:  tokens.Access,
 	}, nil
 }
 
