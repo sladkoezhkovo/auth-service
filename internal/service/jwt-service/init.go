@@ -114,5 +114,5 @@ func (s *jwtService) Save(email, token string) error {
 }
 
 func (s *jwtService) Clear(email string) error {
-	return s.Clear(email)
+	return s.storage.Clear(email)
 }
