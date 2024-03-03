@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/joho/godotenv"
-	api "github.com/sladkoezhkovo/auth-service/api"
+	"github.com/sladkoezhkovo/auth-service/api"
 	"github.com/sladkoezhkovo/auth-service/internal/configs"
 	"github.com/sladkoezhkovo/auth-service/internal/grpc/auth"
 	jwtservice "github.com/sladkoezhkovo/auth-service/internal/service/jwt-service"
@@ -12,7 +12,7 @@ import (
 	userservice "github.com/sladkoezhkovo/auth-service/internal/service/user-service"
 	"github.com/sladkoezhkovo/auth-service/internal/storage/pg"
 	"github.com/sladkoezhkovo/auth-service/internal/storage/redis"
-	cfg "github.com/sladkoezhkovo/auth-service/pkg/configs"
+	"github.com/sladkoezhkovo/lib"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -35,7 +35,10 @@ func main() {
 	flag.Parse()
 
 	var config configs.Config
-	cfg.SetupConfig(configPath, &config)
+
+	if err := lib.SetupConfig(configPath, &config); err != nil {
+		panic(fmt.Errorf("cannot read config: %s", err))
+	}
 
 	fmt.Println(config)
 
