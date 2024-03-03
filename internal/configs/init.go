@@ -1,7 +1,5 @@
 package configs
 
-import "github.com/ilyakaznacheev/cleanenv"
-
 type Config struct {
 	App   AppConfig   `yaml:"app"`
 	Redis RedisConfig `yaml:"redis"`
@@ -31,14 +29,4 @@ type SqlConfig struct {
 type JwtConfig struct {
 	AccessTTL  int `yaml:"accessTTL"`
 	RefreshTTL int `yaml:"refreshTTL"`
-}
-
-func SetupConfig(path string) *Config {
-	var config Config
-
-	if err := cleanenv.ReadConfig(path, &config); err != nil {
-		panic("cannot read config")
-	}
-
-	return &config
 }
