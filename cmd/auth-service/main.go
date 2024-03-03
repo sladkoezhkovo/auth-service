@@ -12,6 +12,7 @@ import (
 	userservice "github.com/sladkoezhkovo/auth-service/internal/service/user-service"
 	"github.com/sladkoezhkovo/auth-service/internal/storage/pg"
 	"github.com/sladkoezhkovo/auth-service/internal/storage/redis"
+	cfg "github.com/sladkoezhkovo/auth-service/pkg/configs"
 	"google.golang.org/grpc"
 	"net"
 	"os"
@@ -26,13 +27,17 @@ func init() {
 }
 
 func main() {
-	if err := godotenv.Load("jwt", "pg", "redis"); err != nil {
-		panic("Error loading environment")
+
+	if err := godotenv.Load(".env.jwt", ".env.pg", ".env.redis"); err != nil {
+		panic(fmt.Errorf("godotenv.Load: %s", err))
 	}
 
 	flag.Parse()
 
-	config := configs.SetupConfig(configPath)
+	var config configs.Config
+	cfg.SetupConfig(configPath, &config)
+
+	fmt.Println(config)
 
 	db, err := pg.Setup(&config.Pg)
 	if err != nil {

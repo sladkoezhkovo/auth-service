@@ -6,7 +6,7 @@ services:
     container_name: pg_auth
     restart: always
     env_file:
-      - pg.env
+      - .env.pg
     volumes:
       - /pg:/var/lib/postgresql/data
     ports:
@@ -30,8 +30,8 @@ services:
       - postgres
       - redis
     env_file:
-      - jwt.env
-      - redis.env
-      - pg.env
+      - .env.jwt
+      - .env.redis
+      - .env.pg
     environment:
       WAIT_HOSTS: postgres:5432
