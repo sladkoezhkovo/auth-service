@@ -1,7 +1,8 @@
 CREATE TABLE IF NOT EXISTS roles (
     id serial primary key,
-    name varchar not null
+    name varchar not null unique
 );
+
 
 CREATE TABLE IF NOT EXISTS users (
     id serial primary key,
