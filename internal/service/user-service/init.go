@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
 type UserRepository interface {
@@ -45,10 +44,9 @@ func (s *userService) SignUp(email, password string, role int) (*entity.User, er
 	}
 
 	user := &entity.User{
-		Email:     email,
-		Password:  string(hash),
-		Role:      role,
-		CreatedAt: time.Now(),
+		Email:    email,
+		Password: string(hash),
+		Role:     role,
 	}
 
 	if err := s.repository.Create(user); err != nil {
