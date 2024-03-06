@@ -10,14 +10,14 @@ type roleRepository struct {
 }
 
 func (r *roleRepository) Create(role *entity.Role) error {
-	return r.db.Get(&role.Id, "INSERT INTO role(name) VALUES ($1)", role.Name)
+	return r.db.Get(&role.Id, "INSERT INTO roles(name) VALUES ($1)", role.Name)
 }
 
 func (r *roleRepository) Find(name string) (*entity.Role, error) {
 
 	var role []entity.Role
 
-	if err := r.db.Select(&role, "SELECT * FROM role WHERE name=$1", name); err != nil {
+	if err := r.db.Select(&role, "SELECT * FROM roles WHERE name=$1", name); err != nil {
 		return nil, err
 	}
 

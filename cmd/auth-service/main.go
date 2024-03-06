@@ -20,19 +20,25 @@ import (
 	"syscall"
 )
 
-var configPath string
+var (
+	configPath string
+	dotenv     bool
+)
 
 func init() {
 	flag.StringVar(&configPath, "config", "configs/.yml", "path to config")
+	flag.BoolVar(&dotenv, "dotenv", false, "enable dotenv")
 }
 
 func main() {
 
-	if err := godotenv.Load(".env.jwt", ".env.pg", ".env.redis"); err != nil {
-		panic(fmt.Errorf("godotenv.Load: %s", err))
-	}
-
 	flag.Parse()
+	if dotenv {
+		fmt.Printf("loading dotenv\n")
+		if err := godotenv.Load(".env.jwt", ".env.pg", ".env.redis"); err != nil {
+			panic(fmt.Errorf("godotenv.Load: %s", err))
+		}
+	}
 
 	var config configs.Config
 
@@ -46,6 +52,7 @@ func main() {
 	if err != nil {
 		panic(fmt.Errorf("error connecting database: %s", err))
 	}
+	fmt.Println("postgres connected")
 
 	userRepo := pg.NewUserRepository(db)
 

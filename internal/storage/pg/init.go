@@ -11,7 +11,7 @@ import (
 func Setup(config *configs.SqlConfig) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%d user=%s "+
 		"password=%s dbname=%s sslmode=%s",
-		config.Host, config.Port, os.Getenv("PG_USER"), os.Getenv("PG_PASSWORD"), config.Db, config.TLS))
+		config.Host, config.Port, os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), config.Db, config.TLS))
 	if err != nil {
 		return nil, err
 	}

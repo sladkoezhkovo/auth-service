@@ -6,3 +6,9 @@ protoc:
 
 deploy:
 	 docker-compose build && docker-compose down && docker-compose up -d
+
+up:
+	migrate -path ./migrations -database 'postgres://postgres:postgres@localhost:5436/auth?sslmode=disable' up
+
+down:
+	migrate -path ./migrations -database 'postgres://postgres:postgres@localhost:5436/auth?sslmode=disable' down

@@ -4,14 +4,14 @@ app:
   port: 5081
 
 redis:
-  host: 'redis'
+  host: 'localhost'
   port: 6379
 
 pg:
-  host: 'pg'
-  port: 5432
+  host: 'localhost'
+  port: 5436
   db: 'auth'
-  tls: 'disabled'
+  tls: 'disable'
 
 jwt:
   accessTTL: 1
