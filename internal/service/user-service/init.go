@@ -3,6 +3,7 @@ package userservice
 import (
 	"errors"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
+	"github.com/sladkoezhkovo/auth-service/internal/grpc/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -63,12 +64,10 @@ func (s *userService) SignIn(email, password string) (*entity.User, error) {
 		return nil, err
 	}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := bcrypt.CompareHashAndPassword(hash, []byte(password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return nil, auth.ErrInvalidPassword
+		}
 		return nil, err
 	}
 

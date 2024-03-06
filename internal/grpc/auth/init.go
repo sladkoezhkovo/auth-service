@@ -2,8 +2,11 @@ package auth
 
 import (
 	"context"
+	"errors"
 	api "github.com/sladkoezhkovo/auth-service/api"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log/slog"
 	"os"
 )
@@ -67,24 +70,24 @@ func (s *server) SignIn(ctx context.Context, request *api.SignInRequest) (*api.T
 	u, err := s.userService.SignIn(request.Email, request.Password)
 	if err != nil {
 		l.Error("user cannot login", slog.String("email", request.Email), slog.Any("err", err))
+		if errors.Is(err, ErrInvalidPassword) {
+			return nil, status.Errorf(codes.Canceled, "invalid email or password")
+		}
 		return nil, err
 	}
-
-	l.Error("successfully signin", slog.Any("user", u))
 
 	tokens, err := s.jwtService.Generate(u)
 	if err != nil {
 		l.Error("tokens cant be generated", slog.Any("err", err))
 		return nil, err
 	}
-	l.Error("tokens generated", slog.Any("tokens", tokens))
 
 	if err := s.jwtService.Save(u.Email, tokens.Refresh); err != nil {
 		l.Error("refresh token unable to save", slog.String("email", u.Email), slog.String("refresh-token", tokens.Refresh), slog.Any("err", err))
 		return nil, err
 	}
 
-	l.Info("successfully signin", slog.Any("tokens", tokens))
+	l.Info("successfully signin", slog.Any("user", u))
 
 	return &api.TokenResponse{
 		RefreshToken: tokens.Refresh,
