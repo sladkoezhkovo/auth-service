@@ -58,7 +58,6 @@ func (s *userService) SignUp(email, password string, role int) (*entity.User, er
 }
 
 func (s *userService) SignIn(email, password string) (*entity.User, error) {
-
 	user, err := s.repository.Find(email)
 	if err != nil {
 		return nil, err
