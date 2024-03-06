@@ -4,6 +4,8 @@ import (
 	"context"
 	api "github.com/sladkoezhkovo/auth-service/api"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
+	"log/slog"
+	"os"
 )
 
 type UserService interface {
@@ -21,10 +23,12 @@ type JwtService interface {
 }
 
 type RoleService interface {
+	Create(role *entity.Role) error
 	Find(role string) (*entity.Role, error)
 }
 
 type server struct {
+	logger      *slog.Logger
 	userService UserService
 	jwtService  JwtService
 	roleService RoleService
@@ -36,24 +40,51 @@ func NewServer(user UserService, jwt JwtService, role RoleService) *server {
 		userService: user,
 		jwtService:  jwt,
 		roleService: role,
+		logger:      slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})),
 	}
+}
+
+func (s *server) CreateRole(ctx context.Context, request *api.CreateRoleRequest) (*api.Empty, error) {
+
+	l := s.logger.With(slog.String("handle", "CreateRole"))
+	role := &entity.Role{
+		Name: request.Name,
+	}
+
+	if err := s.roleService.Create(role); err != nil {
+		l.Error("error with creating role", slog.Any("err", err))
+		return nil, err
+	}
+
+	l.Info("successfully created role", slog.String("role", role.Name))
+
+	return &api.Empty{}, nil
 }
 
 func (s *server) SignIn(ctx context.Context, request *api.SignInRequest) (*api.TokenResponse, error) {
 
+	l := s.logger.With(slog.String("handle", "SignIn"))
 	u, err := s.userService.SignIn(request.Email, request.Password)
 	if err != nil {
+		l.Error("user cannot login", slog.String("email", request.Email), slog.Any("err", err))
 		return nil, err
 	}
+
+	l.Error("successfully signin", slog.Any("user", u))
 
 	tokens, err := s.jwtService.Generate(u)
 	if err != nil {
+		l.Error("tokens cant be generated", slog.Any("err", err))
+		return nil, err
+	}
+	l.Error("tokens generated", slog.Any("tokens", tokens))
+
+	if err := s.jwtService.Save(u.Email, tokens.Refresh); err != nil {
+		l.Error("refresh token unable to save", slog.String("email", u.Email), slog.String("refresh-token", tokens.Refresh), slog.Any("err", err))
 		return nil, err
 	}
 
-	if err := s.jwtService.Save(u.Email, tokens.Refresh); err != nil {
-		return nil, err
-	}
+	l.Info("successfully signin", slog.Any("tokens", tokens))
 
 	return &api.TokenResponse{
 		RefreshToken: tokens.Refresh,
@@ -65,24 +96,34 @@ func (s *server) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.T
 
 	// TODO VALIDATE REQUEST
 
+	l := s.logger.With(slog.String("handle", "SignIn"))
 	role, err := s.roleService.Find(request.Role)
 	if err != nil {
+		l.Error("role unable to found", slog.String("role", request.Role), slog.Any("err", err))
 		return nil, err
 	}
+	l.Debug("role found", slog.Any("role", role))
 
 	u, err := s.userService.SignUp(request.Email, request.Password, role.Id)
 	if err != nil {
+		l.Error("unable to signup", slog.Any("req", request), slog.Int("role_id", role.Id), slog.Any("err", err))
 		return nil, err
 	}
+	l.Debug("user signed up", slog.Any("user", u))
 
 	tokens, err := s.jwtService.Generate(u)
 	if err != nil {
+		l.Error("tokens cant be generated", slog.Any("err", err))
+		return nil, err
+	}
+	l.Error("tokens generated", slog.Any("tokens", tokens))
+
+	if err := s.jwtService.Save(u.Email, tokens.Refresh); err != nil {
+		l.Error("refresh token unable to save", slog.String("email", u.Email), slog.String("refresh-token", tokens.Refresh), slog.Any("err", err))
 		return nil, err
 	}
 
-	if err := s.jwtService.Save(u.Email, tokens.Refresh); err != nil {
-		return nil, err
-	}
+	l.Info("successfully signin", slog.Any("tokens", tokens))
 
 	return &api.TokenResponse{
 		RefreshToken: tokens.Refresh,

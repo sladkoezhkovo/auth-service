@@ -14,7 +14,7 @@ func (s *jwtService) generateAccess(user *entity.User) (string, error) {
 	}
 	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(s.config.AccessTTL)))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signed, err := token.SignedString(os.Getenv("JWT_ACCESS_SECRET"))
+	signed, err := token.SignedString([]byte(os.Getenv("JWT_ACCESS_SECRET")))
 	if err != nil {
 		return "", err
 	}
@@ -29,7 +29,7 @@ func (s *jwtService) generateRefresh(user *entity.User) (string, error) {
 	}
 	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(s.config.RefreshTTL)))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	signed, err := token.SignedString(os.Getenv("JWT_ACCESS_SECRET"))
+	signed, err := token.SignedString([]byte(os.Getenv("JWT_ACCESS_SECRET")))
 	if err != nil {
 		return "", err
 	}

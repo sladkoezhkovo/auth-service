@@ -10,7 +10,7 @@ type userRepository struct {
 }
 
 func (r *userRepository) Create(user *entity.User) error {
-	if _, err := r.db.NamedExec("INSERT INTO users(email, password, role) VALUES (:email, :password, :role)", user); err != nil {
+	if _, err := r.db.NamedExec("INSERT INTO users(email, password, role_id) VALUES (:email, :password, :role)", user); err != nil {
 		return err
 	}
 

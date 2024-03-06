@@ -1,6 +1,10 @@
 build:
 	go build -v ./cmd/auth-service
 
+debug:
+	make build
+	.\auth-service.exe -dotenv
+
 protoc:
 	protoc proto/auth.proto --go_out=. --go-grpc_out=.
 
