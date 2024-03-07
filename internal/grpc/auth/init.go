@@ -164,7 +164,12 @@ func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api
 }
 
 func (s *server) Logout(ctx context.Context, request *api.LogoutRequest) (*api.Empty, error) {
-	return &api.Empty{}, s.jwtService.Clear(request.Email)
+	token, err := s.jwtService.ValidateAccess(request.AccessToken)
+	if err != nil {
+		return nil, status.Errorf(codes.Canceled, err.Error())
+	}
+
+	return &api.Empty{}, s.jwtService.Clear(token.Email)
 }
 
 func (s *server) Auth(ctx context.Context, request *api.AuthRequest) (*api.AuthResponse, error) {
