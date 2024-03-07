@@ -3,7 +3,7 @@ build:
 
 debug:
 	make build
-	.\auth-service.exe -dotenv
+	.\auth-service.exe -dotenv -config configs/local.yml
 
 protoc:
 	protoc proto/auth.proto --go_out=. --go-grpc_out=.
