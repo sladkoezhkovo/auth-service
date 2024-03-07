@@ -9,6 +9,7 @@ import (
 type roleStorage interface {
 	Create(role *entity.Role) error
 	Find(name string) (*entity.Role, error)
+	FindById(roleId int) (*entity.Role, error)
 }
 
 var (
@@ -42,6 +43,19 @@ func (r *roleService) Create(role *entity.Role) error {
 
 func (r *roleService) Find(name string) (*entity.Role, error) {
 	role, err := r.storage.Find(name)
+	if err != nil {
+		return nil, err
+	}
+
+	if role == nil {
+		return role, errors.New("role not found")
+	}
+
+	return role, nil
+}
+
+func (r *roleService) FindById(roleId int) (*entity.Role, error) {
+	role, err := r.storage.FindById(roleId)
 	if err != nil {
 		return nil, err
 	}

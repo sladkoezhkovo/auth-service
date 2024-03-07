@@ -1,0 +1,1 @@
+ALTER TABLE auth.public.roles ADD COLUMN authority int;

@@ -10,7 +10,7 @@ type roleRepository struct {
 }
 
 func (r *roleRepository) Create(role *entity.Role) error {
-	if _, err := r.db.NamedExec("INSERT INTO roles(name) VALUES (:name)", role); err != nil {
+	if _, err := r.db.NamedExec("INSERT INTO roles(name, authority) VALUES (:name, :authority)", role); err != nil {
 		return err
 	}
 	return nil
@@ -24,7 +24,23 @@ func (r *roleRepository) Find(name string) (*entity.Role, error) {
 		return nil, err
 	}
 
-	if len(role) < 1 {
+	if len(role) == 0 {
+		//return nil, errors.New("role not found")
+		return nil, nil
+	}
+
+	return &role[0], nil
+}
+
+func (r *roleRepository) FindById(roleId int) (*entity.Role, error) {
+
+	var role []entity.Role
+
+	if err := r.db.Select(&role, "SELECT * FROM roles WHERE id=$1", roleId); err != nil {
+		return nil, err
+	}
+
+	if len(role) == 0 {
 		//return nil, errors.New("role not found")
 		return nil, nil
 	}

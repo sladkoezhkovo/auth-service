@@ -28,6 +28,7 @@ type JwtService interface {
 type RoleService interface {
 	Create(role *entity.Role) error
 	Find(role string) (*entity.Role, error)
+	FindById(roleId int) (*entity.Role, error)
 }
 
 type server struct {
@@ -51,7 +52,8 @@ func (s *server) CreateRole(ctx context.Context, request *api.CreateRoleRequest)
 
 	l := s.logger.With(slog.String("handle", "CreateRole"))
 	role := &entity.Role{
-		Name: request.Name,
+		Name:      request.Name,
+		Authority: request.Authority,
 	}
 
 	if err := s.roleService.Create(role); err != nil {
@@ -178,7 +180,13 @@ func (s *server) Auth(ctx context.Context, request *api.AuthRequest) (*api.AuthR
 		return nil, err
 	}
 
+	userRole, err := s.roleService.FindById(info.Role)
+	if err != nil {
+		// TODO add errors.Is() for expired token
+		return nil, err
+	}
+
 	return &api.AuthResponse{
-		Approved: role.Id == info.Role,
+		Approved: role.Authority >= userRole.Authority,
 	}, nil
 }
