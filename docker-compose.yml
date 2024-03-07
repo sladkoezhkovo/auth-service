@@ -17,7 +17,7 @@ services:
     container_name: redis_auth
     restart: always
     volumes:
-      - redis:/usr/local/etc/redis
+      - redis:/data
     ports:
       - '6379:6379'
 
@@ -39,5 +39,5 @@ services:
       - '5081:5081'
 
 volumes:
-    redis:
-    pg:
+  redis:
+  pg:
