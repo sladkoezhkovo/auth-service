@@ -8,7 +8,7 @@ services:
     env_file:
       - .env.pg
     volumes:
-      - /pg:/var/lib/postgresql/data
+      - pg:/var/lib/postgresql/data
     ports:
       - '5436:5432'
 
@@ -17,7 +17,7 @@ services:
     container_name: redis_auth
     restart: always
     volumes:
-      - /redis:/usr/local/etc/redis
+      - redis:/usr/local/etc/redis
     ports:
       - '6379:6379'
 
@@ -37,3 +37,7 @@ services:
       WAIT_HOSTS: postgres:5432
     ports:
       - '5081:5081'
+
+volumes:
+    redis:
+    pg:
