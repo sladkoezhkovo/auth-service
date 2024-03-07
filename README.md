@@ -8,14 +8,14 @@
 ## Environment variables
 
 ```yaml
-# jwt.env
+# .env.jwt
 JWT_REFRESH_SECRET
 JWT_ACCESS_SECRET
 
-# pg.env 
+# .env.pg
 POSTGRES_USER       
 POSTGRES_PASSWORD   
 
-# redis.env
+# .env.redis
 REDIS_PASSWORD
 ```
