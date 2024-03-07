@@ -10,7 +10,10 @@ type roleRepository struct {
 }
 
 func (r *roleRepository) Create(role *entity.Role) error {
-	return r.db.Get(&role.Id, "INSERT INTO roles(name) VALUES ($1)", role.Name)
+	if _, err := r.db.NamedExec("INSERT INTO roles(name) VALUES (:name)", role); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *roleRepository) Find(name string) (*entity.Role, error) {

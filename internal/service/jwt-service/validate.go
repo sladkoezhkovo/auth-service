@@ -10,13 +10,13 @@ import (
 func (s *jwtService) validate(tokenString string, secret string) (*entity.UserClaims, error) {
 
 	token, err := jwt.ParseWithClaims(tokenString, &userClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return secret, nil
+		return []byte(secret), nil
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(userClaims)
+	claims, ok := token.Claims.(*userClaims)
 	if !ok {
 		return nil, errors.New("unable to parse claims")
 	}
