@@ -15,7 +15,7 @@ type AppConfig struct {
 
 type RedisConfig struct {
 	Host string `yaml:"host"`
-	Port string `yaml:"port"`
+	Port int    `yaml:"port"`
 	Db   int    `yaml:"db" env-default:"0"`
 }
 

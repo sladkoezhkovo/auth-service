@@ -10,7 +10,7 @@ type userRepository struct {
 }
 
 func (r *userRepository) Create(user *entity.User) error {
-	if _, err := r.db.NamedExec("INSERT INTO user(email, password, role, created_at) VALUES (:email, :password, :role, :created_at)", user); err != nil {
+	if _, err := r.db.NamedExec("INSERT INTO users(email, password, role_id) VALUES (:email, :password, :role_id)", user); err != nil {
 		return err
 	}
 
@@ -20,7 +20,7 @@ func (r *userRepository) Create(user *entity.User) error {
 func (r *userRepository) Find(email string) (*entity.User, error) {
 	var users []entity.User
 
-	if err := r.db.Select(&users, "SELECT * FROM user WHERE email=$1", email); err != nil {
+	if err := r.db.Select(&users, "SELECT * FROM users WHERE email=$1", email); err != nil {
 		return nil, err
 	}
 
