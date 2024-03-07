@@ -6,6 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -41,7 +42,21 @@ func (s *jwtService) validate(tokenString string, secret string) (*entity.UserCl
 }
 
 func (s *jwtService) ValidateRefresh(tokenString string) (*entity.UserClaims, error) {
-	return s.validate(tokenString, os.Getenv("JWT_REFRESH_SECRET"))
+	claims, err := s.validate(tokenString, os.Getenv("JWT_REFRESH_SECRET"))
+	if err != nil {
+		return nil, err
+	}
+
+	validToken, err := s.storage.Get(claims.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.Compare(validToken, tokenString) != 0 {
+		return nil, fmt.Errorf("invalid refresh token")
+	}
+
+	return claims, nil
 }
 
 func (s *jwtService) ValidateAccess(tokenString string) (*entity.UserClaims, error) {
