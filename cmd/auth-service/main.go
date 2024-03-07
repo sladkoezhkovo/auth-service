@@ -66,7 +66,7 @@ func main() {
 	roleService := roleservice.New(roleRepo)
 
 	server := grpc.NewServer()
-	handler := auth.NewServer(userService, jwtService, roleService)
+	handler := auth.NewLoggingServer(userService, jwtService, roleService)
 
 	api.RegisterAuthServiceServer(server, handler)
 

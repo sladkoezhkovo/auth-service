@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
+	"github.com/sladkoezhkovo/auth-service/internal/grpc/auth"
 	"os"
 	"strings"
-	"time"
 )
 
 func (s *jwtService) validate(tokenString string, secret string) (*entity.UserClaims, error) {
@@ -19,20 +19,15 @@ func (s *jwtService) validate(tokenString string, secret string) (*entity.UserCl
 		return []byte(secret), nil
 	}, jwt.WithExpirationRequired())
 	if err != nil {
+		if errors.Is(err, jwt.ErrTokenExpired) {
+			return nil, auth.ErrTokenExpired
+		}
 		return nil, err
-	}
-
-	if !token.Valid {
-		return nil, errors.New("unathorized")
 	}
 
 	claims, ok := token.Claims.(*userClaims)
 	if !ok {
 		return nil, errors.New("unable to parse claims")
-	}
-
-	if claims.ExpiresAt.Before(time.Now()) {
-		return nil, errors.New("token expired")
 	}
 
 	return &entity.UserClaims{
