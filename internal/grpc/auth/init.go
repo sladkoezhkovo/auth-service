@@ -3,7 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
-	api "github.com/sladkoezhkovo/auth-service/api"
+	api "github.com/sladkoezhkovo/auth-service/api/auth"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -42,20 +42,6 @@ func NewServer(user UserService, jwt JwtService, role RoleService) *server {
 		jwtService:  jwt,
 		roleService: role,
 	}
-}
-
-func (s *server) CreateRole(ctx context.Context, request *api.CreateRoleRequest) (*api.Empty, error) {
-
-	role := &entity.Role{
-		Name:      request.Name,
-		Authority: request.Authority,
-	}
-
-	if err := s.roleService.Create(role); err != nil {
-		return nil, err
-	}
-
-	return &api.Empty{}, nil
 }
 
 func (s *server) SignIn(ctx context.Context, request *api.SignInRequest) (*api.TokenResponse, error) {
@@ -169,7 +155,13 @@ func (s *server) Auth(ctx context.Context, request *api.AuthRequest) (*api.AuthR
 		return nil, status.Errorf(codes.Canceled, err.Error())
 	}
 
-	return &api.AuthResponse{
-		Approved: role.Authority >= userRole.Authority,
-	}, nil
+	response := &api.AuthResponse{}
+
+	if role.Authority == userRole.Authority {
+		response.Approved = role.Id == userRole.Id
+	} else {
+		response.Approved = role.Authority > userRole.Authority
+	}
+
+	return response, nil
 }

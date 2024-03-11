@@ -28,11 +28,14 @@ func New(storage roleStorage) *roleService {
 
 func (r *roleService) Create(role *entity.Role) error {
 	if err := r.storage.Create(role); err != nil {
-		pgerr := err.(*pq.Error)
+		var pgerr *pq.Error
+		if ok := errors.As(err, &pgerr); ok {
+			switch pgerr.Code {
+			case "23505":
+				return ErrUniqueViolation
+			}
 
-		switch pgerr.Code {
-		case pq.ErrorCode("23505"):
-			return ErrUniqueViolation
+			return pgerr
 		}
 
 		return err
