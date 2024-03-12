@@ -7,5 +7,5 @@ type Tokens struct {
 
 type UserClaims struct {
 	Email string
-	Role  int
+	Role  int64
 }

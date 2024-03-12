@@ -9,8 +9,8 @@ import (
 
 func (s *jwtService) generateAccess(user *entity.User) (string, error) {
 	claims := userClaims{
-		Role:  user.Role,
-		Email: user.Email,
+		RoleId: user.Role.Id,
+		Email:  user.Email,
 	}
 	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(s.config.AccessTTL)))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -24,8 +24,8 @@ func (s *jwtService) generateAccess(user *entity.User) (string, error) {
 
 func (s *jwtService) generateRefresh(user *entity.User) (string, error) {
 	claims := userClaims{
-		Role:  user.Role,
-		Email: user.Email,
+		RoleId: user.Role.Id,
+		Email:  user.Email,
 	}
 	claims.ExpiresAt = jwt.NewNumericDate(time.Now().Add(time.Hour * time.Duration(s.config.RefreshTTL)))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
