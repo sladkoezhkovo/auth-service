@@ -56,7 +56,7 @@ func (s *server) ListRole(ctx context.Context, bounds *api.Bounds) (*api.ListRol
 
 	resp := &api.ListRoleResponse{
 		Entries: entries,
-		Count:   int64(count),
+		Count:   int32(count),
 	}
 
 	return resp, nil
@@ -76,7 +76,7 @@ func (s *server) ListRoleByName(ctx context.Context, request *api.ListRoleByName
 
 	resp := &api.ListRoleResponse{
 		Entries: entries,
-		Count:   int64(count),
+		Count:   int32(count),
 	}
 
 	return resp, nil

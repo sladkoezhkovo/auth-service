@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/lib/pq"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
+	"github.com/sladkoezhkovo/auth-service/internal/service"
 )
 
 type RoleRepository interface {
@@ -15,11 +16,6 @@ type RoleRepository interface {
 	Update(role *entity.Role) error
 	Delete(id int64) error
 }
-
-var (
-	ErrUniqueViolation = errors.New("record already exists")
-	ErrNotFound        = errors.New("nothing found")
-)
 
 type roleService struct {
 	repository RoleRepository
@@ -37,7 +33,7 @@ func (s *roleService) Create(role *entity.Role) error {
 		if ok := errors.As(err, &pgerr); ok {
 			switch pgerr.Code {
 			case "23505":
-				return ErrUniqueViolation
+				return service.ErrUniqueViolation
 			}
 			return pgerr
 		}
@@ -51,7 +47,7 @@ func (s *roleService) FindById(id int64) (*entity.Role, error) {
 	role, err := s.repository.FindById(id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrNotFound
+			return nil, service.ErrNotFound
 		}
 		return nil, err
 	}
@@ -63,7 +59,7 @@ func (s *roleService) List(limit, offset int32) ([]*entity.Role, int, error) {
 	entries, count, err := s.repository.List(limit, offset)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, 0, ErrNotFound
+			return nil, 0, service.ErrNotFound
 		}
 		return nil, 0, err
 	}
@@ -75,7 +71,7 @@ func (s *roleService) ListByName(name string, limit, offset int32) ([]*entity.Ro
 	entries, count, err := s.repository.ListByName(name, limit, offset)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, 0, ErrNotFound
+			return nil, 0, service.ErrNotFound
 		}
 		return nil, 0, err
 	}

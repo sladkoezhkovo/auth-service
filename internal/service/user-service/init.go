@@ -1,16 +1,20 @@
 package userservice
 
 import (
+	"database/sql"
 	"errors"
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
 	"github.com/sladkoezhkovo/auth-service/internal/grpc/auth"
+	"github.com/sladkoezhkovo/auth-service/internal/service"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepository interface {
 	Create(user *entity.User) error
-	Find(email string) (*entity.User, error)
-	Get(id int) (*entity.User, error)
+	FindById(id int64) (*entity.User, error)
+	FindByEmail(email string) (*entity.User, error)
+	List(limit, offset int32) ([]*entity.User, int, error)
+	ListByRole(roleId int64, limit, offset int32) ([]*entity.User, int, error)
 	Update(user *entity.User) error
 	Delete(id int) error
 }
@@ -19,23 +23,58 @@ type userService struct {
 	repository UserRepository
 }
 
-func (s *userService) Find(email string) (*entity.User, error) {
-
-	u, err := s.repository.Find(email)
-	if err != nil {
-		return nil, err
+func New(repo UserRepository) *userService {
+	return &userService{
+		repository: repo,
 	}
-	if u == nil {
-		return nil, errors.New("user not found")
+}
+
+func (s *userService) FindByEmail(email string) (*entity.User, error) {
+	u, err := s.repository.FindByEmail(email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, service.ErrNotFound
+		}
+		return nil, err
 	}
 
 	return u, nil
 }
 
-func New(repo UserRepository) *userService {
-	return &userService{
-		repository: repo,
+func (s *userService) FindById(id int64) (*entity.User, error) {
+	u, err := s.repository.FindById(id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, service.ErrNotFound
+		}
+		return nil, err
 	}
+
+	return u, nil
+}
+
+func (s *userService) List(limit, offset int32) ([]*entity.User, int, error) {
+	uu, count, err := s.repository.List(limit, offset)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, 0, service.ErrNotFound
+		}
+		return nil, 0, err
+	}
+
+	return uu, count, nil
+}
+
+func (s *userService) ListByRole(roleId int64, limit, offset int32) ([]*entity.User, int, error) {
+	uu, count, err := s.repository.ListByRole(roleId, limit, offset)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, 0, service.ErrNotFound
+		}
+		return nil, 0, err
+	}
+
+	return uu, count, nil
 }
 
 func (s *userService) SignUp(user *entity.User) error {
@@ -54,7 +93,7 @@ func (s *userService) SignUp(user *entity.User) error {
 }
 
 func (s *userService) SignIn(user *entity.User) error {
-	candidate, err := s.repository.Find(user.Email)
+	candidate, err := s.repository.FindByEmail(user.Email)
 	if err != nil {
 		return err
 	}

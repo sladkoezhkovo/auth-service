@@ -12,7 +12,10 @@ import (
 type UserService interface {
 	SignIn(user *entity.User) error
 	SignUp(user *entity.User) error
-	Find(email string) (*entity.User, error)
+	FindById(id int64) (*entity.User, error)
+	FindByEmail(email string) (*entity.User, error)
+	List(limit, offset int32) ([]*entity.User, int, error)
+	ListByRole(roleId int64, limit, offset int32) ([]*entity.User, int, error)
 }
 
 type JwtService interface {
@@ -104,7 +107,7 @@ func (s *server) Refresh(ctx context.Context, request *api.RefreshRequest) (*api
 		return nil, status.Errorf(codes.Unauthenticated, "invalid token")
 	}
 
-	u, err := s.userService.Find(info.Email)
+	u, err := s.userService.FindByEmail(info.Email)
 	if err != nil {
 		return nil, status.Errorf(codes.Canceled, err.Error())
 	}

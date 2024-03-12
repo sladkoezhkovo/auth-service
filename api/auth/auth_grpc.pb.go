@@ -27,6 +27,10 @@ type AuthServiceClient interface {
 	Refresh(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*TokenResponse, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*Empty, error)
 	Auth(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error)
+	// Users RD
+	FindUserById(ctx context.Context, in *FindUserByIdRequest, opts ...grpc.CallOption) (*UserDetails, error)
+	ListUser(ctx context.Context, in *Bounds, opts ...grpc.CallOption) (*ListUserResponse, error)
+	ListUserByRole(ctx context.Context, in *ListUserByRoleRequest, opts ...grpc.CallOption) (*ListUserResponse, error)
 	// Role CRUD
 	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error)
 	FindByIdRole(ctx context.Context, in *FindRoleByIdRequest, opts ...grpc.CallOption) (*Role, error)
@@ -83,6 +87,33 @@ func (c *authServiceClient) Logout(ctx context.Context, in *LogoutRequest, opts 
 func (c *authServiceClient) Auth(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
 	out := new(AuthResponse)
 	err := c.cc.Invoke(ctx, "/auth.AuthService/Auth", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) FindUserById(ctx context.Context, in *FindUserByIdRequest, opts ...grpc.CallOption) (*UserDetails, error) {
+	out := new(UserDetails)
+	err := c.cc.Invoke(ctx, "/auth.AuthService/FindUserById", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ListUser(ctx context.Context, in *Bounds, opts ...grpc.CallOption) (*ListUserResponse, error) {
+	out := new(ListUserResponse)
+	err := c.cc.Invoke(ctx, "/auth.AuthService/ListUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ListUserByRole(ctx context.Context, in *ListUserByRoleRequest, opts ...grpc.CallOption) (*ListUserResponse, error) {
+	out := new(ListUserResponse)
+	err := c.cc.Invoke(ctx, "/auth.AuthService/ListUserByRole", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -152,6 +183,10 @@ type AuthServiceServer interface {
 	Refresh(context.Context, *RefreshRequest) (*TokenResponse, error)
 	Logout(context.Context, *LogoutRequest) (*Empty, error)
 	Auth(context.Context, *AuthRequest) (*AuthResponse, error)
+	// Users RD
+	FindUserById(context.Context, *FindUserByIdRequest) (*UserDetails, error)
+	ListUser(context.Context, *Bounds) (*ListUserResponse, error)
+	ListUserByRole(context.Context, *ListUserByRoleRequest) (*ListUserResponse, error)
 	// Role CRUD
 	CreateRole(context.Context, *CreateRoleRequest) (*Role, error)
 	FindByIdRole(context.Context, *FindRoleByIdRequest) (*Role, error)
@@ -180,6 +215,15 @@ func (UnimplementedAuthServiceServer) Logout(context.Context, *LogoutRequest) (*
 }
 func (UnimplementedAuthServiceServer) Auth(context.Context, *AuthRequest) (*AuthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Auth not implemented")
+}
+func (UnimplementedAuthServiceServer) FindUserById(context.Context, *FindUserByIdRequest) (*UserDetails, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindUserById not implemented")
+}
+func (UnimplementedAuthServiceServer) ListUser(context.Context, *Bounds) (*ListUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUser not implemented")
+}
+func (UnimplementedAuthServiceServer) ListUserByRole(context.Context, *ListUserByRoleRequest) (*ListUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUserByRole not implemented")
 }
 func (UnimplementedAuthServiceServer) CreateRole(context.Context, *CreateRoleRequest) (*Role, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRole not implemented")
@@ -298,6 +342,60 @@ func _AuthService_Auth_Handler(srv interface{}, ctx context.Context, dec func(in
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AuthServiceServer).Auth(ctx, req.(*AuthRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_FindUserById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindUserByIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).FindUserById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.AuthService/FindUserById",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).FindUserById(ctx, req.(*FindUserByIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ListUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Bounds)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ListUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.AuthService/ListUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ListUser(ctx, req.(*Bounds))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ListUserByRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserByRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ListUserByRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.AuthService/ListUserByRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ListUserByRole(ctx, req.(*ListUserByRoleRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -436,6 +534,18 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Auth",
 			Handler:    _AuthService_Auth_Handler,
+		},
+		{
+			MethodName: "FindUserById",
+			Handler:    _AuthService_FindUserById_Handler,
+		},
+		{
+			MethodName: "ListUser",
+			Handler:    _AuthService_ListUser_Handler,
+		},
+		{
+			MethodName: "ListUserByRole",
+			Handler:    _AuthService_ListUserByRole_Handler,
 		},
 		{
 			MethodName: "CreateRole",
