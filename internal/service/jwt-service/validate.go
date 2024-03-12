@@ -32,7 +32,7 @@ func (s *jwtService) validate(tokenString string, secret string) (*entity.UserCl
 
 	return &entity.UserClaims{
 		Email: claims.Email,
-		Role:  claims.Role,
+		Role:  claims.RoleId,
 	}, nil
 }
 

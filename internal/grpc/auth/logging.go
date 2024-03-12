@@ -2,7 +2,7 @@ package auth
 
 import (
 	"context"
-	"github.com/sladkoezhkovo/auth-service/api"
+	api "github.com/sladkoezhkovo/auth-service/api/auth"
 	"google.golang.org/grpc/status"
 	"log/slog"
 	"os"
@@ -37,11 +37,42 @@ func (s *loggingServer) log(handle string, err error) *slog.Logger {
 	return l
 }
 
-func (s *loggingServer) CreateRole(ctx context.Context, request *api.CreateRoleRequest) (*api.Empty, error) {
+func (s *loggingServer) CreateRole(ctx context.Context, request *api.CreateRoleRequest) (*api.Role, error) {
 	r, err := s.srv.CreateRole(ctx, request)
 	s.log("CreateRole", err)
 	return r, err
 }
+
+func (s *loggingServer) FindByIdRole(ctx context.Context, request *api.FindRoleByIdRequest) (*api.Role, error) {
+	r, err := s.srv.FindByIdRole(ctx, request)
+	s.log("FindByIdRole", err)
+	return r, err
+}
+
+func (s *loggingServer) ListRole(ctx context.Context, bounds *api.Bounds) (*api.ListRoleResponse, error) {
+	r, err := s.srv.ListRole(ctx, bounds)
+	s.log("ListRole", err)
+	return r, err
+}
+
+func (s *loggingServer) ListRoleByName(ctx context.Context, request *api.ListRoleByNameRequest) (*api.ListRoleResponse, error) {
+	r, err := s.srv.ListRoleByName(ctx, request)
+	s.log("ListRoleByName", err)
+	return r, err
+}
+
+func (s *loggingServer) UpdateRole(ctx context.Context, request *api.Role) (*api.Role, error) {
+	r, err := s.srv.UpdateRole(ctx, request)
+	s.log("UpdateRole", err)
+	return r, err
+}
+
+func (s *loggingServer) DeleteRole(ctx context.Context, request *api.DeleteRoleRequest) (*api.Empty, error) {
+	r, err := s.srv.DeleteRole(ctx, request)
+	s.log("DeleteRole", err)
+	return r, err
+}
+
 func (s *loggingServer) SignIn(ctx context.Context, request *api.SignInRequest) (*api.TokenResponse, error) {
 	r, err := s.srv.SignIn(ctx, request)
 	s.log("SignIn", err)

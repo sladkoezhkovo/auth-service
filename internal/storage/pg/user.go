@@ -9,12 +9,20 @@ type userRepository struct {
 	db *sqlx.DB
 }
 
-func (r *userRepository) Create(user *entity.User) error {
-	if _, err := r.db.NamedExec("INSERT INTO users(email, password, role_id) VALUES (:email, :password, :role_id)", user); err != nil {
-		return err
+func NewUserRepository(conn *sqlx.DB) *userRepository {
+	return &userRepository{
+		db: conn,
 	}
+}
 
-	return nil
+func (r *userRepository) Create(user *entity.User) error {
+	return r.db.Get(
+		user,
+		`INSERT INTO users(email, password, role_id) VALUES ($1, $2, $3) RETURNING id, email, password, created_at, role_id as "role.id"`,
+		user.Email,
+		user.Password,
+		user.Role.Id,
+	)
 }
 
 func (r *userRepository) Find(email string) (*entity.User, error) {
@@ -45,10 +53,4 @@ func (r *userRepository) Update(user *entity.User) error {
 func (r *userRepository) Delete(id int) error {
 	//TODO implement me
 	panic("implement me")
-}
-
-func NewUserRepository(conn *sqlx.DB) *userRepository {
-	return &userRepository{
-		db: conn,
-	}
 }

@@ -4,7 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/joho/godotenv"
-	"github.com/sladkoezhkovo/auth-service/api"
+	api "github.com/sladkoezhkovo/auth-service/api/auth"
 	"github.com/sladkoezhkovo/auth-service/internal/configs"
 	"github.com/sladkoezhkovo/auth-service/internal/grpc/auth"
 	jwtservice "github.com/sladkoezhkovo/auth-service/internal/service/jwt-service"
@@ -22,28 +22,32 @@ import (
 
 var (
 	configPath string
-	dotenv     bool
+)
+
+const (
+	EnvLocal = "local"
+	EnvDev   = "dev"
 )
 
 func init() {
 	flag.StringVar(&configPath, "config", "configs/.yml", "path to config")
-	flag.BoolVar(&dotenv, "dotenv", false, "enable dotenv")
 }
 
 func main() {
 
 	flag.Parse()
-	if dotenv {
-		fmt.Printf("loading dotenv\n")
-		if err := godotenv.Load(".env.jwt", ".env.pg", ".env.redis"); err != nil {
-			panic(fmt.Errorf("godotenv.Load: %s", err))
-		}
-	}
 
 	var config configs.Config
 
 	if err := lib.SetupConfig(configPath, &config); err != nil {
 		panic(fmt.Errorf("cannot read config: %s", err))
+	}
+
+	if config.App.Env == EnvLocal {
+		fmt.Printf("loading dotenv\n")
+		if err := godotenv.Load(".env.jwt", ".env.pg", ".env.redis"); err != nil {
+			panic(fmt.Errorf("godotenv.Load: %s", err))
+		}
 	}
 
 	fmt.Println(config)

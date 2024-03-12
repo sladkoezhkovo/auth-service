@@ -10,8 +10,8 @@ import (
 )
 
 type UserService interface {
-	SignIn(email, password string) (*entity.User, error)
-	SignUp(email, password string, role int) (*entity.User, error)
+	SignIn(user *entity.User) error
+	SignUp(user *entity.User) error
 	Find(email string) (*entity.User, error)
 }
 
@@ -21,12 +21,6 @@ type JwtService interface {
 	ValidateAccess(token string) (*entity.UserClaims, error)
 	Save(email, refresh string) error
 	Clear(email string) error
-}
-
-type RoleService interface {
-	Create(role *entity.Role) error
-	Find(role string) (*entity.Role, error)
-	FindById(roleId int) (*entity.Role, error)
 }
 
 type server struct {
@@ -46,20 +40,25 @@ func NewServer(user UserService, jwt JwtService, role RoleService) *server {
 
 func (s *server) SignIn(ctx context.Context, request *api.SignInRequest) (*api.TokenResponse, error) {
 
-	u, err := s.userService.SignIn(request.Email, request.Password)
-	if err != nil {
+	user := &entity.User{
+		Email:    request.Email,
+		Password: request.Password,
+		Role:     entity.Role{},
+	}
+
+	if err := s.userService.SignIn(user); err != nil {
 		if errors.Is(err, ErrInvalidPassword) {
 			return nil, status.Errorf(codes.Canceled, "invalid email or password")
 		}
 		return nil, err
 	}
 
-	tokens, err := s.jwtService.Generate(u)
+	tokens, err := s.jwtService.Generate(user)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := s.jwtService.Save(u.Email, tokens.Refresh); err != nil {
+	if err := s.jwtService.Save(user.Email, tokens.Refresh); err != nil {
 		return nil, err
 	}
 
@@ -71,24 +70,24 @@ func (s *server) SignIn(ctx context.Context, request *api.SignInRequest) (*api.T
 
 func (s *server) SignUp(ctx context.Context, request *api.SignUpRequest) (*api.TokenResponse, error) {
 
-	// TODO VALIDATE REQUEST
+	user := &entity.User{
+		Email:    request.Email,
+		Password: request.Password,
+		Role: entity.Role{
+			Id: request.RoleId,
+		},
+	}
 
-	role, err := s.roleService.Find(request.Role)
+	if err := s.userService.SignUp(user); err != nil {
+		return nil, err
+	}
+
+	tokens, err := s.jwtService.Generate(user)
 	if err != nil {
 		return nil, err
 	}
 
-	u, err := s.userService.SignUp(request.Email, request.Password, role.Id)
-	if err != nil {
-		return nil, err
-	}
-
-	tokens, err := s.jwtService.Generate(u)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := s.jwtService.Save(u.Email, tokens.Refresh); err != nil {
+	if err := s.jwtService.Save(user.Email, tokens.Refresh); err != nil {
 		return nil, err
 	}
 
@@ -136,7 +135,7 @@ func (s *server) Logout(ctx context.Context, request *api.LogoutRequest) (*api.E
 
 func (s *server) Auth(ctx context.Context, request *api.AuthRequest) (*api.AuthResponse, error) {
 
-	role, err := s.roleService.Find(request.Role)
+	role, err := s.roleService.FindById(request.RoleId)
 	if err != nil {
 		return nil, err
 	}

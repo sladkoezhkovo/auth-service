@@ -27,7 +27,13 @@ type AuthServiceClient interface {
 	Refresh(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*TokenResponse, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*Empty, error)
 	Auth(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error)
-	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Empty, error)
+	// Role CRUD
+	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error)
+	FindByIdRole(ctx context.Context, in *FindRoleByIdRequest, opts ...grpc.CallOption) (*Role, error)
+	ListRole(ctx context.Context, in *Bounds, opts ...grpc.CallOption) (*ListRoleResponse, error)
+	ListRoleByName(ctx context.Context, in *ListRoleByNameRequest, opts ...grpc.CallOption) (*ListRoleResponse, error)
+	UpdateRole(ctx context.Context, in *Role, opts ...grpc.CallOption) (*Role, error)
+	DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type authServiceClient struct {
@@ -83,9 +89,54 @@ func (c *authServiceClient) Auth(ctx context.Context, in *AuthRequest, opts ...g
 	return out, nil
 }
 
-func (c *authServiceClient) CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *authServiceClient) CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*Role, error) {
+	out := new(Role)
 	err := c.cc.Invoke(ctx, "/auth.AuthService/CreateRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) FindByIdRole(ctx context.Context, in *FindRoleByIdRequest, opts ...grpc.CallOption) (*Role, error) {
+	out := new(Role)
+	err := c.cc.Invoke(ctx, "/auth.AuthService/FindByIdRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ListRole(ctx context.Context, in *Bounds, opts ...grpc.CallOption) (*ListRoleResponse, error) {
+	out := new(ListRoleResponse)
+	err := c.cc.Invoke(ctx, "/auth.AuthService/ListRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) ListRoleByName(ctx context.Context, in *ListRoleByNameRequest, opts ...grpc.CallOption) (*ListRoleResponse, error) {
+	out := new(ListRoleResponse)
+	err := c.cc.Invoke(ctx, "/auth.AuthService/ListRoleByName", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) UpdateRole(ctx context.Context, in *Role, opts ...grpc.CallOption) (*Role, error) {
+	out := new(Role)
+	err := c.cc.Invoke(ctx, "/auth.AuthService/UpdateRole", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) DeleteRole(ctx context.Context, in *DeleteRoleRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/auth.AuthService/DeleteRole", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +152,13 @@ type AuthServiceServer interface {
 	Refresh(context.Context, *RefreshRequest) (*TokenResponse, error)
 	Logout(context.Context, *LogoutRequest) (*Empty, error)
 	Auth(context.Context, *AuthRequest) (*AuthResponse, error)
-	CreateRole(context.Context, *CreateRoleRequest) (*Empty, error)
+	// Role CRUD
+	CreateRole(context.Context, *CreateRoleRequest) (*Role, error)
+	FindByIdRole(context.Context, *FindRoleByIdRequest) (*Role, error)
+	ListRole(context.Context, *Bounds) (*ListRoleResponse, error)
+	ListRoleByName(context.Context, *ListRoleByNameRequest) (*ListRoleResponse, error)
+	UpdateRole(context.Context, *Role) (*Role, error)
+	DeleteRole(context.Context, *DeleteRoleRequest) (*Empty, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -124,8 +181,23 @@ func (UnimplementedAuthServiceServer) Logout(context.Context, *LogoutRequest) (*
 func (UnimplementedAuthServiceServer) Auth(context.Context, *AuthRequest) (*AuthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Auth not implemented")
 }
-func (UnimplementedAuthServiceServer) CreateRole(context.Context, *CreateRoleRequest) (*Empty, error) {
+func (UnimplementedAuthServiceServer) CreateRole(context.Context, *CreateRoleRequest) (*Role, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRole not implemented")
+}
+func (UnimplementedAuthServiceServer) FindByIdRole(context.Context, *FindRoleByIdRequest) (*Role, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindByIdRole not implemented")
+}
+func (UnimplementedAuthServiceServer) ListRole(context.Context, *Bounds) (*ListRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRole not implemented")
+}
+func (UnimplementedAuthServiceServer) ListRoleByName(context.Context, *ListRoleByNameRequest) (*ListRoleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListRoleByName not implemented")
+}
+func (UnimplementedAuthServiceServer) UpdateRole(context.Context, *Role) (*Role, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateRole not implemented")
+}
+func (UnimplementedAuthServiceServer) DeleteRole(context.Context, *DeleteRoleRequest) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteRole not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 
@@ -248,6 +320,96 @@ func _AuthService_CreateRole_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_FindByIdRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindRoleByIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).FindByIdRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.AuthService/FindByIdRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).FindByIdRole(ctx, req.(*FindRoleByIdRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ListRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Bounds)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ListRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.AuthService/ListRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ListRole(ctx, req.(*Bounds))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_ListRoleByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListRoleByNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).ListRoleByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.AuthService/ListRoleByName",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).ListRoleByName(ctx, req.(*ListRoleByNameRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_UpdateRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Role)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).UpdateRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.AuthService/UpdateRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).UpdateRole(ctx, req.(*Role))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_DeleteRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).DeleteRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/auth.AuthService/DeleteRole",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).DeleteRole(ctx, req.(*DeleteRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -278,6 +440,26 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateRole",
 			Handler:    _AuthService_CreateRole_Handler,
+		},
+		{
+			MethodName: "FindByIdRole",
+			Handler:    _AuthService_FindByIdRole_Handler,
+		},
+		{
+			MethodName: "ListRole",
+			Handler:    _AuthService_ListRole_Handler,
+		},
+		{
+			MethodName: "ListRoleByName",
+			Handler:    _AuthService_ListRoleByName_Handler,
+		},
+		{
+			MethodName: "UpdateRole",
+			Handler:    _AuthService_UpdateRole_Handler,
+		},
+		{
+			MethodName: "DeleteRole",
+			Handler:    _AuthService_DeleteRole_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
