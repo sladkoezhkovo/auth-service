@@ -3,8 +3,6 @@ package userservice
 import (
 	"database/sql"
 	"errors"
-	"fmt"
-
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
 	"github.com/sladkoezhkovo/auth-service/internal/grpc/auth"
 	"github.com/sladkoezhkovo/auth-service/internal/service"
@@ -94,20 +92,18 @@ func (s *userService) SignUp(user *entity.User) error {
 	return nil
 }
 
-func (s *userService) SignIn(user *entity.User) error {
+func (s *userService) SignIn(user *entity.User) (*entity.User, error) {
 	candidate, err := s.repository.FindByEmail(user.Email)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	fmt.Println(candidate.Password)
 
 	if err := bcrypt.CompareHashAndPassword([]byte(candidate.Password), []byte(user.Password)); err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return auth.ErrInvalidPassword
+			return nil, auth.ErrInvalidPassword
 		}
-		return err
+		return nil, err
 	}
 
-	return nil
+	return candidate, nil
 }

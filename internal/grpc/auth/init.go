@@ -10,7 +10,7 @@ import (
 )
 
 type UserService interface {
-	SignIn(user *entity.User) error
+	SignIn(user *entity.User) (*entity.User, error)
 	SignUp(user *entity.User) error
 	FindById(id int64) (*entity.User, error)
 	FindByEmail(email string) (*entity.User, error)
@@ -43,13 +43,14 @@ func NewServer(user UserService, jwt JwtService, role RoleService) *server {
 
 func (s *server) SignIn(ctx context.Context, request *api.SignInRequest) (*api.TokenResponse, error) {
 
-	user := &entity.User{
+	req := &entity.User{
 		Email:    request.Email,
 		Password: request.Password,
 		Role:     entity.Role{},
 	}
 
-	if err := s.userService.SignIn(user); err != nil {
+	user, err := s.userService.SignIn(req)
+	if err != nil {
 		if errors.Is(err, ErrInvalidPassword) {
 			return nil, status.Errorf(codes.Canceled, "invalid email or password")
 		}
@@ -61,7 +62,7 @@ func (s *server) SignIn(ctx context.Context, request *api.SignInRequest) (*api.T
 		return nil, err
 	}
 
-	if err := s.jwtService.Save(user.Email, tokens.Refresh); err != nil {
+	if err := s.jwtService.Save(req.Email, tokens.Refresh); err != nil {
 		return nil, err
 	}
 
