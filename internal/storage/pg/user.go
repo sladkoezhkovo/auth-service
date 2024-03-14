@@ -31,7 +31,8 @@ func (r *userRepository) FindById(id int64) (*entity.User, error) {
 	if err := r.db.Get(&user, `
 SELECT 
 	u.id, 
-	u.email, 
+	u.email,
+	u.password, 
 	u.created_at, 
 	r.id as "role.id", 
 	r.name as "role.name"
@@ -53,6 +54,7 @@ func (r *userRepository) FindByEmail(email string) (*entity.User, error) {
 SELECT 
 	u.id, 
 	u.email, 
+	u.password,
 	u.created_at, 
 	r.id as "role.id", 
 	r.name as "role.name"

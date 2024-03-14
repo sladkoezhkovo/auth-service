@@ -3,6 +3,8 @@ package userservice
 import (
 	"database/sql"
 	"errors"
+	"fmt"
+
 	"github.com/sladkoezhkovo/auth-service/internal/entity"
 	"github.com/sladkoezhkovo/auth-service/internal/grpc/auth"
 	"github.com/sladkoezhkovo/auth-service/internal/service"
@@ -97,6 +99,8 @@ func (s *userService) SignIn(user *entity.User) error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(candidate.Password)
 
 	if err := bcrypt.CompareHashAndPassword([]byte(candidate.Password), []byte(user.Password)); err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
