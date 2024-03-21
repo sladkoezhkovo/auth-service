@@ -27,7 +27,7 @@ type AuthServiceClient interface {
 	Refresh(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*TokenResponse, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*Empty, error)
 	Auth(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error)
-	// Users RD
+	// Users R
 	FindUserById(ctx context.Context, in *FindUserByIdRequest, opts ...grpc.CallOption) (*UserDetails, error)
 	ListUser(ctx context.Context, in *Bounds, opts ...grpc.CallOption) (*ListUserResponse, error)
 	ListUserByRole(ctx context.Context, in *ListUserByRoleRequest, opts ...grpc.CallOption) (*ListUserResponse, error)
@@ -183,7 +183,7 @@ type AuthServiceServer interface {
 	Refresh(context.Context, *RefreshRequest) (*TokenResponse, error)
 	Logout(context.Context, *LogoutRequest) (*Empty, error)
 	Auth(context.Context, *AuthRequest) (*AuthResponse, error)
-	// Users RD
+	// Users R
 	FindUserById(context.Context, *FindUserByIdRequest) (*UserDetails, error)
 	ListUser(context.Context, *Bounds) (*ListUserResponse, error)
 	ListUserByRole(context.Context, *ListUserByRoleRequest) (*ListUserResponse, error)

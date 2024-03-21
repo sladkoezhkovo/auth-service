@@ -36,7 +36,13 @@ func (r *roleRepository) List(limit, offset int32) ([]*entity.Role, int, error) 
 	if err := r.db.Select(&rr, "SELECT * FROM roles ORDER BY id LIMIT $1 OFFSET $2", limit, offset); err != nil {
 		return nil, 0, err
 	}
-	return rr, len(rr), nil
+
+	var count int
+	if err := r.db.Get(&count, "SELECT COUNT(id) FROM roles"); err != nil {
+		return nil, 0, err
+	}
+
+	return rr, count, nil
 }
 
 func (r *roleRepository) ListByName(name string, limit, offset int32) ([]*entity.Role, int, error) {

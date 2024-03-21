@@ -13,9 +13,13 @@ func (s *server) FindUserById(ctx context.Context, req *api.FindUserByIdRequest)
 	}
 
 	resp := &api.UserDetails{
-		Id:        u.Id,
-		Email:     u.Email,
-		Role:      u.Role.Name,
+		Id:    u.Id,
+		Email: u.Email,
+		Role: &api.Role{
+			Id:        u.Role.Id,
+			Name:      u.Role.Name,
+			Authority: u.Role.Authority,
+		},
 		CreatedAt: u.CreatedAt.Unix(),
 	}
 
@@ -29,7 +33,7 @@ func (s *server) ListUser(ctx context.Context, req *api.Bounds) (*api.ListUserRe
 	}
 
 	resp := &api.ListUserResponse{
-		Entries: make([]*api.User, 0, count),
+		Entries: make([]*api.User, 0, len(uu)),
 		Count:   int32(count),
 	}
 
@@ -51,7 +55,7 @@ func (s *server) ListUserByRole(ctx context.Context, req *api.ListUserByRoleRequ
 	}
 
 	resp := &api.ListUserResponse{
-		Entries: make([]*api.User, 0, count),
+		Entries: make([]*api.User, 0, len(uu)),
 		Count:   int32(count),
 	}
 

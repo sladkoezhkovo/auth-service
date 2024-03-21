@@ -35,7 +35,8 @@ SELECT
 	u.password, 
 	u.created_at, 
 	r.id as "role.id", 
-	r.name as "role.name"
+	r.name as "role.name",
+	r.authority as "role.authority"
 FROM users u 
 INNER JOIN public.roles r on r.id = u.role_id 
 WHERE u.id = $1
@@ -57,7 +58,8 @@ SELECT
 	u.password,
 	u.created_at, 
 	r.id as "role.id", 
-	r.name as "role.name"
+	r.name as "role.name",
+	r.authority as "role.authority"
 FROM users u 
 INNER JOIN public.roles r on r.id = u.role_id 
 WHERE u.email = $1
@@ -74,12 +76,19 @@ func (r *userRepository) List(limit, offset int32) ([]*entity.User, int, error) 
 SELECT 
 	u.id, u.email, u.created_at, r.name as "role.name"
 FROM users u 
-INNER JOIN public.roles r on r.id = u.role_id 
+INNER JOIN public.roles r on r.id = u.role_id
+ORDER BY id
 LIMIT $1 OFFSET $2`,
 		limit, offset); err != nil {
 		return nil, 0, err
 	}
-	return users, len(users), nil
+
+	var count int
+	if err := r.db.Get(&count, "SELECT COUNT(id) FROM users"); err != nil {
+		return nil, 0, err
+	}
+
+	return users, count, nil
 }
 
 func (r *userRepository) ListByRole(roleId int64, limit, offset int32) ([]*entity.User, int, error) {
@@ -90,6 +99,7 @@ SELECT
 FROM users u 
 INNER JOIN public.roles r on r.id = u.role_id 
 WHERE u.role_id = $1
+ORDER BY id
 LIMIT $2 OFFSET $3`,
 		roleId, limit, offset); err != nil {
 		return nil, 0, err
@@ -98,8 +108,11 @@ LIMIT $2 OFFSET $3`,
 }
 
 func (r *userRepository) Update(user *entity.User) error {
-	//TODO implement me
-	panic("implement me")
+	return r.db.Get(
+		user,
+		`UPDATE auth.public.users SET email = $1, password = $2, role_id = $3 WHERE id = $4`,
+		user.Email, user.Password, user.Role.Id, user.Id,
+	)
 }
 
 func (r *userRepository) Delete(id int) error {

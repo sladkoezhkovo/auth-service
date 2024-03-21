@@ -48,7 +48,7 @@ func (s *server) ListRole(ctx context.Context, bounds *api.Bounds) (*api.ListRol
 		return nil, err
 	}
 
-	entries := make([]*api.Role, 0, count)
+	entries := make([]*api.Role, 0, len(roles))
 
 	for _, r := range roles {
 		entries = append(entries, converter.RoleFromEntityToDto(r))
@@ -68,7 +68,7 @@ func (s *server) ListRoleByName(ctx context.Context, request *api.ListRoleByName
 		return nil, err
 	}
 
-	entries := make([]*api.Role, 0, count)
+	entries := make([]*api.Role, 0, len(roles))
 
 	for _, r := range roles {
 		entries = append(entries, converter.RoleFromEntityToDto(r))
